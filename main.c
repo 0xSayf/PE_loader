@@ -2,40 +2,35 @@
 #include <Windows.h>
 #include <winnt.h>
 
-int pointer;
+// void detect_arch()
+// {
+//     __asm
+//     {
+//             mov eax, esp
+//             push 0
+//             sub eax, esp
+//             pop ecx
+//             cmp eax, 8
+//             je is_64bit
 
-void detect_arch()
-{
-    __asm
-    {
-        mov eax, esp
-        push 0
-        sub eax, esp
-        pop ecx
-        cmp eax, 8
-        je is_64bit
+//         is_32bit:
+//             mov pointer , 4
+//             jmp end_label
 
-    is_32bit:
-        mov pointer , 4
-        jmp end_label
+//         is_64bit:
+//             mov pointer , 8
+//             jmp end_label
 
-    is_64bit:
-        mov pointer , 8
-        jmp end_label
-
-    end_label:
-    }
-}
+//         end_label:
+//     }
+// }
 
 int main(int ac, char **av)
 {
     FILE *file;
     long int size_of_file_on_disk;
 
-    detect_arch();
-
-    printf("Pointer size detected: %d bytes\n", pointer);
-
+    // detect_arch();
     if (ac != 2)
     {
         printf("Syntax : .exe path_to_file\n");
@@ -64,11 +59,10 @@ int main(int ac, char **av)
         printf("Memory allocation failed.\n");
         return 0;
     }
-
     rewind(file); 
     fread(ptr, 1, size_of_file_on_disk, file);
+    
     fclose(file);
     free(ptr);
-    
     return 0;
 }
