@@ -1,4 +1,3 @@
-
 #include "include.h"
 
 WORD ft_checking_arch(char *ptr)
@@ -42,12 +41,17 @@ int main(int ac, char **av)
     if (!ptr)
     {
         fclose(file);
-        printf("Memory allocation failed.\n");
         return 0;
     }
     rewind(file); 
     fread(ptr, 1, size_of_file_on_disk, file);
-    arch = ft_checking_arch(ptr); 
+    arch = ft_checking_arch(ptr);
+    if(arch == 0x10B)
+        ft_load_32(ptr);
+    else if(arch == 0x20B)
+        ft_load_64(ptr);
+    else
+        printf("Not a PE_FILE =)\n");
     fclose(file);
     free(ptr);
     return 0;
