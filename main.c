@@ -1,36 +1,22 @@
-#include <stdio.h>
-#include <Windows.h>
-#include <winnt.h>
 
-// void detect_arch()
-// {
-//     __asm
-//     {
-//             mov eax, esp
-//             push 0
-//             sub eax, esp
-//             pop ecx
-//             cmp eax, 8
-//             je is_64bit
+#include "include.h"
 
-//         is_32bit:
-//             mov pointer , 4
-//             jmp end_label
+WORD ft_checking_arch(char *ptr)
+{
+    WORD magic_value;
+    DWORD elfanew;
 
-//         is_64bit:
-//             mov pointer , 8
-//             jmp end_label
-
-//         end_label:
-//     }
-// }
+    elfanew = *(DWORD *)(ptr + 0x3C);
+    magic_value = *(WORD *)(ptr + elfanew + 24);
+    return magic_value;
+}
 
 int main(int ac, char **av)
 {
     FILE *file;
     long int size_of_file_on_disk;
+    WORD arch;
 
-    // detect_arch();
     if (ac != 2)
     {
         printf("Syntax : .exe path_to_file\n");
@@ -61,7 +47,7 @@ int main(int ac, char **av)
     }
     rewind(file); 
     fread(ptr, 1, size_of_file_on_disk, file);
-    
+    arch = ft_checking_arch(ptr); 
     fclose(file);
     free(ptr);
     return 0;

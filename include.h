@@ -2,8 +2,8 @@
 #define INCLUDE_H
 
 #include <stdio.h>
-#include <winnt.h>
-#include <windows.h>
+// #include <winnt.h>
+// #include <windows.h>
 
 typedef unsigned short WORD;
 typedef unsigned __int64 ULONGLONG;
