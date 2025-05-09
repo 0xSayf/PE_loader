@@ -48,8 +48,8 @@ int main(int ac, char **av)
     arch = ft_checking_arch(ptr);
     if(arch == 0x10B)
         ft_load_32(ptr);
-    else if(arch == 0x20B)
-        ft_load_64(ptr);
+    // else if(arch == 0x20B)
+    //     ft_load_64(ptr);
     else
         printf("Not a PE_FILE =)\n");
     fclose(file);
