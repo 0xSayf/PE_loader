@@ -40,7 +40,7 @@ void    ft_load_32(char *ptr)
     /*Resolve IAT(import address table) each imported function 
     with his address from the DLL */
     
-    // import_dir_table = (DWORD *)(image_base + VA_import);
+    IMAGE_IMPORT_DESCRIPTOR* import_descriptors = (IMAGE_IMPORT_DESCRIPTOR*) (image_base + *(DWORD *)(ptr + VA_import));
 
     void (*entry)() = (void (*)())(image_base + entrypoint);
     entry();
