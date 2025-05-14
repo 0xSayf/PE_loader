@@ -7,7 +7,6 @@ void    ft_load_32(char *ptr)
     DWORD size_of_image;
     DWORD entrypoint;
     WORD  num_of_sections;
-    char  *import_dir_table;
     unsigned int section_RVA;
     char *sections_back;
     char *image_base;
@@ -40,8 +39,17 @@ void    ft_load_32(char *ptr)
     /*Resolve IAT(import address table) each imported function 
     with his address from the DLL */
     
-    IMAGE_IMPORT_DESCRIPTOR* import_descriptors = (IMAGE_IMPORT_DESCRIPTOR*) (image_base + *(DWORD *)(ptr + VA_import));
-
+    IMAGE_IMPORT_DESCRIPTOR* import_dir = (IMAGE_IMPORT_DESCRIPTOR*) (image_base + *(DWORD *)(ptr + VA_import));
+    i = 0;
+    while (import_dir[i].OriginalFirstThunk != 0)
+    {
+        BYTE *name_dll = image_base + import_dir[i].Name;
+        HMODULE dll_load = LoadLibraryA(name_dll);
+        if(!dll_load)
+            return ;
+         
+        i++;
+    }
     void (*entry)() = (void (*)())(image_base + entrypoint);
     entry();
 }
