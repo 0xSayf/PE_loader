@@ -9,8 +9,11 @@ void    ft_load_32(char *ptr)
     WORD  num_of_sections;
     unsigned int section_RVA;
     char *sections_back;
-    ILT_CUST_32 RVA_ILT;
+    WORD ordinal;
+    DWORD    ILT_BY_NAME;
+    ILT_CUST_32 *RVA_ILT;
     char *image_base;
+    BYTE flag;
     DWORD   VA_import;
 
     elfanew = *(DWORD *)(ptr + 0x3C);
@@ -48,12 +51,21 @@ void    ft_load_32(char *ptr)
         HMODULE dll_load = LoadLibraryA(name_dll);
         if(!dll_load)
             return ;
-        IMAGE_THUNK_DATA32 *ILT32 = image_base + import_dir[i].OriginalFirstThunk;
-        IMAGE_THUNK_DATA32 *IAT32 = image_base + import_dir[i].FirstThunk;
+        IMAGE_THUNK_DATA32 *ILT32 = (IMAGE_THUNK_DATA32 *) image_base + import_dir[i].OriginalFirstThunk;
+        IMAGE_THUNK_DATA32 *IAT32 = (IMAGE_THUNK_DATA32 *) image_base + import_dir[i].FirstThunk;
         int j = 0;
         while (ILT32[j].u1.AddressOfData != 0)
         {
-
+            RVA_ILT = (ILT_CUST_32 *)ILT32[j].u1.AddressOfData;
+            flag = RVA_ILT->myaw.flag;
+            if(flag == 0x01)
+                ordinal = RVA_ILT->myaw.ordinal;
+            else if(flag == 0x0)
+                ILT_BY_NAME = RVA_ILT->myaw.RVA_by_NAME;
+            if(flag == 0x0)
+            {
+                
+            }
             j++;
         } 
         i++;
