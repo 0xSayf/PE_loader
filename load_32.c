@@ -9,6 +9,7 @@ void    ft_load_32(char *ptr)
     WORD  num_of_sections;
     unsigned int section_RVA;
     char *sections_back;
+    ILT_CUST_32 RVA_ILT;
     char *image_base;
     DWORD   VA_import;
 
@@ -47,7 +48,14 @@ void    ft_load_32(char *ptr)
         HMODULE dll_load = LoadLibraryA(name_dll);
         if(!dll_load)
             return ;
-         
+        IMAGE_THUNK_DATA32 *ILT32 = image_base + import_dir[i].OriginalFirstThunk;
+        IMAGE_THUNK_DATA32 *IAT32 = image_base + import_dir[i].FirstThunk;
+        int j = 0;
+        while (ILT32[j].u1.AddressOfData != 0)
+        {
+
+            j++;
+        } 
         i++;
     }
     void (*entry)() = (void (*)())(image_base + entrypoint);
