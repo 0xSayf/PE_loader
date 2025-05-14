@@ -31,7 +31,6 @@ void    ft_load_32(char *ptr)
     int i = 0;
     while (i < num_of_sections)
     {
-        printf("%X\n", *(DWORD*) (ptr + section_RVA + 0x14));
         sections_back = image_base + *(DWORD*)(ptr + section_RVA + 0x14);
         memcpy(sections_back, ptr + *(DWORD*)(ptr + section_RVA + 0x14) ,*(DWORD*)(ptr + section_RVA + 0x10));
         section_RVA += 40;
