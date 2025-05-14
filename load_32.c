@@ -64,7 +64,8 @@ void    ft_load_32(char *ptr)
                 ILT_BY_NAME = RVA_ILT->myaw.RVA_by_NAME;
             if(flag == 0x0)
             {
-                
+                IMAGE_IMPORT_BY_NAME *HINT_NAME = (IMAGE_IMPORT_BY_NAME *) image_base + ILT_BY_NAME;
+                char *func_name =  (char*) HINT_NAME->Name;
             }
             j++;
         } 
