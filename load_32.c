@@ -8,7 +8,6 @@ void    ft_load_32(char *ptr)
     DWORD entrypoint;
     WORD  num_of_sections;
     unsigned int section_RVA;
-    char *sections_back;
     WORD ordinal;
     DWORD    ILT_BY_NAME;
     ILT_CUST_32 *RVA_ILT;
@@ -34,9 +33,9 @@ void    ft_load_32(char *ptr)
     int i = 0;
     while  ( i < num_of_sections) 
     {
-        DWORD virtual_address   = *(DWORD*)(ptr + section_RVA + 0x0C);
-        DWORD raw_address       = *(DWORD*)(ptr + section_RVA + 0x14);  
-        DWORD raw_size          = *(DWORD*)(ptr + section_RVA + 0x10);  
+        DWORD virtual_address = *(DWORD*)(ptr + section_RVA + 0x0C);
+        DWORD raw_address   = *(DWORD*)(ptr + section_RVA + 0x14);  
+        DWORD raw_size      = *(DWORD*)(ptr + section_RVA + 0x10);  
         memcpy(image_base + virtual_address, ptr + raw_address, raw_size);
         section_RVA += 40;
         i++;
