@@ -32,22 +32,31 @@ void    ft_load_32(char *ptr)
     /* load all sections*/
     section_RVA = elfanew + 0xF8;
     int i = 0;
-    while (i < num_of_sections)
+    while  ( i < num_of_sections) 
     {
-        sections_back = image_base + *(DWORD*)(ptr + section_RVA + 0x14);
-        memcpy(sections_back, ptr + *(DWORD*)(ptr + section_RVA + 0x14) ,*(DWORD*)(ptr + section_RVA + 0x10));
+        DWORD virtual_address   = *(DWORD*)(ptr + section_RVA + 0x0C);
+        DWORD raw_address       = *(DWORD*)(ptr + section_RVA + 0x14);  
+        DWORD raw_size          = *(DWORD*)(ptr + section_RVA + 0x10);  
+        // if (virtual_address + raw_size > size_of_image || raw_address + raw_size > size_of_image) 
+        // {
+        //     printf("Invalid section data\n");
+        //     exit(1);
+        // }
+        memcpy(image_base + virtual_address, ptr + raw_address, raw_size);
         section_RVA += 40;
         i++;
     }
 
+
     /*Resolve IAT(import address table) each imported function 
     with his address from the DLL */
     
-    IMAGE_IMPORT_DESCRIPTOR* import_dir = (IMAGE_IMPORT_DESCRIPTOR*) (image_base + *(DWORD *)(ptr + VA_import));
-    i = 0;
+    IMAGE_IMPORT_DESCRIPTOR* import_dir = (IMAGE_IMPORT_DESCRIPTOR*) (image_base +  VA_import);
+     i = 0;
     while (import_dir[i].OriginalFirstThunk != 0)
     {
         BYTE *name_dll = image_base + import_dir[i].Name;
+        printf("%s\n", name_dll);
         HMODULE dll_load = LoadLibraryA(name_dll);
         if(!dll_load)
             return ;
