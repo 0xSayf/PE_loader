@@ -42,7 +42,6 @@ void    ft_load_32(char *ptr)
         i++;
     }
 
-
     /*Resolve IAT(import address table) each imported function 
     with his address from the DLL */
     
