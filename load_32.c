@@ -37,11 +37,6 @@ void    ft_load_32(char *ptr)
         DWORD virtual_address   = *(DWORD*)(ptr + section_RVA + 0x0C);
         DWORD raw_address       = *(DWORD*)(ptr + section_RVA + 0x14);  
         DWORD raw_size          = *(DWORD*)(ptr + section_RVA + 0x10);  
-        // if (virtual_address + raw_size > size_of_image || raw_address + raw_size > size_of_image) 
-        // {
-        //     printf("Invalid section data\n");
-        //     exit(1);
-        // }
         memcpy(image_base + virtual_address, ptr + raw_address, raw_size);
         section_RVA += 40;
         i++;
