@@ -1,4 +1,5 @@
 #include "include.h"
+#include <stdbool.h>
 
 void    ft_load_32(char *ptr)
 {
@@ -7,6 +8,7 @@ void    ft_load_32(char *ptr)
     char *func_name;
     DWORD size_of_image;
     DWORD entrypoint;
+    DWORD raw_size;
     WORD  num_of_sections;
     unsigned int section_RVA;
     WORD ordinal;
@@ -34,7 +36,7 @@ void    ft_load_32(char *ptr)
     {
         DWORD virtual_address = *(DWORD*)(ptr + section_RVA + 0x0C);
         DWORD raw_address   = *(DWORD*)(ptr + section_RVA + 0x14);  
-        DWORD raw_size      = *(DWORD*)(ptr + section_RVA + 0x10);  
+        raw_size      = *(DWORD*)(ptr + section_RVA + 0x10);  
         memcpy(image_base + virtual_address, ptr + raw_address, raw_size);
         section_RVA += 40;
         i++;
@@ -70,6 +72,40 @@ void    ft_load_32(char *ptr)
             IAT32[j].u1.Function = (DWORD) address_fun;
             j++;
         } 
+        i++;
+    }
+
+    /* Setting permissions for headers and for each section*/
+    
+    DWORD *oldprotect;
+    DWORD  protect = 0;
+    VirtualProtect(image_base, size_of_headers, 0x02, oldprotect);
+    i = 0;
+    section_RVA = elfanew + 0xF8;
+    while (i < num_of_sections)
+    {
+        DWORD   Characteristics = *(DWORD*)(ptr + section_RVA + 0x24);
+        char *section_addr = image_base + *(DWORD*)(ptr + section_RVA + 0xC);
+        raw_size      = *(DWORD*)(ptr + section_RVA + 0x10);
+        bool    EXEc = Characteristics & IMAGE_SCN_MEM_EXECUTE;
+        bool    readix = Characteristics & IMAGE_SCN_MEM_READ;
+        bool    writex = Characteristics & IMAGE_SCN_MEM_WRITE;
+        if(EXEc)
+        {
+            if(writex)
+                protect = 0x40;
+            else
+                protect = 0x20;
+        }
+        else
+        {
+            if(writex)
+                protect = 0x04;
+            else 
+                protect = 0x02;
+        }
+        VirtualProtect(section_addr,raw_size , protect, oldprotect);
+        section_RVA += 40;
         i++;
     }
     void (*entry)() = (void (*)())(image_base + entrypoint);
