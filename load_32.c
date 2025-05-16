@@ -4,11 +4,13 @@ void    ft_load_32(char *ptr)
 {
     DWORD elfanew;
     DWORD size_of_headers;
+    char *func_name;
     DWORD size_of_image;
     DWORD entrypoint;
     WORD  num_of_sections;
     unsigned int section_RVA;
     WORD ordinal;
+    void *address_fun;
     char *image_base;
     DWORD   VA_import;
 
@@ -47,21 +49,23 @@ void    ft_load_32(char *ptr)
     {
         BYTE *name_dll = image_base + import_dir[i].Name;
         HMODULE dll_load = LoadLibraryA(name_dll);
-        printf("%s\n", name_dll);
         if(!dll_load)
             return ;
         IMAGE_THUNK_DATA32 *ILT32 = (IMAGE_THUNK_DATA32 *) (image_base + import_dir[i].OriginalFirstThunk);
         IMAGE_THUNK_DATA32 *IAT32 = (IMAGE_THUNK_DATA32 *) (image_base + import_dir[i].FirstThunk);
         int j = 0;
-         while (ILT32[j].u1.AddressOfData != 0)
+        while (ILT32[j].u1.AddressOfData != 0)
         {
             if(ILT32[j].u1.Ordinal & 0x80000000)
+            {
                 ordinal = (WORD)(ILT32[j].u1.Ordinal & 0xFFFF);
+                address_fun = (void *)GetProcAddress(dll_load,(LPCSTR)ordinal);
+            }
             else
             {
                 IMAGE_IMPORT_BY_NAME *HINT_NAME = (IMAGE_IMPORT_BY_NAME *) (image_base + ILT32[j].u1.AddressOfData);
-                char *func_name =  (char*) HINT_NAME->Name;
-                printf("%s\n", func_name);
+                func_name =  (char*) HINT_NAME->Name;
+                address_fun = (void *)GetProcAddress(dll_load,func_name);
             }
             j++;
         } 
