@@ -67,6 +67,7 @@ void    ft_load_32(char *ptr)
                 func_name =  (char*) HINT_NAME->Name;
                 address_fun = (void *)GetProcAddress(dll_load,func_name);
             }
+            IAT32[j].u1.Function = (DWORD) address_fun;
             j++;
         } 
         i++;
