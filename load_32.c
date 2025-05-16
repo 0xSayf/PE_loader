@@ -10,7 +10,6 @@ void    ft_load_32(char *ptr)
     unsigned int section_RVA;
     WORD ordinal;
     char *image_base;
-    BYTE flag;
     DWORD   VA_import;
 
     elfanew = *(DWORD *)(ptr + 0x3C);
@@ -57,9 +56,7 @@ void    ft_load_32(char *ptr)
          while (ILT32[j].u1.AddressOfData != 0)
         {
             if(ILT32[j].u1.Ordinal & 0x80000000)
-            {
-                printf("fdf\n");
-            }
+                ordinal = (WORD)(ILT32[j].u1.Ordinal & 0xFFFF);
             else
             {
                 IMAGE_IMPORT_BY_NAME *HINT_NAME = (IMAGE_IMPORT_BY_NAME *) (image_base + ILT32[j].u1.AddressOfData);
