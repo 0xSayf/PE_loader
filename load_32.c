@@ -77,7 +77,7 @@ void    ft_load_32(char *ptr)
 
     /* Setting permissions for headers and for each section*/
     
-    DWORD *oldprotect;
+    DWORD *oldprotect = NULL;
     DWORD  protect = 0;
     VirtualProtect(image_base, size_of_headers, 0x02, oldprotect);
     i = 0;
