@@ -77,8 +77,8 @@ void    ft_load_32(char *ptr)
         i++;
     }
     /*Loading the Basereloc (.reloc)*/
-
-    DWORD delta = (DWORD)image_base - (*(DWORD *)(ptr + 0x34));
+    DWORD hh = *(DWORD*)(ptr + elfanew + 0x34);
+    DWORD delta = (DWORD)image_base - hh;
     DWORD   reloc_va = *(DWORD *)(ptr + elfanew + 0xA0);
     if(reloc_va && delta)
     {
@@ -117,24 +117,24 @@ void    ft_load_32(char *ptr)
         bool    EXEc = Characteristics & IMAGE_SCN_MEM_EXECUTE;
         bool    readix = Characteristics & IMAGE_SCN_MEM_READ;
         bool    writex = Characteristics & IMAGE_SCN_MEM_WRITE;
-        if (EXEc) {
+        if (EXEc) 
+        {
             if (writex)
                 protect = PAGE_EXECUTE_READWRITE;
-            else if (readix)
+            else 
                 protect = PAGE_EXECUTE_READ;
-            else
-                protect = PAGE_EXECUTE;
-        } else {
+        } 
+        else 
+        {
             if (writex)
                 protect = PAGE_READWRITE;
-            else if (readix)
+            else 
                 protect = PAGE_READONLY;
         }
         VirtualProtect(section_addr,raw_size , protect, &oldprotect);
         section_RVA += 40;
         i++;
     }
-    printf("fdfds\n");
     void (*entry)() = (void (*)())(image_base + entrypoint);
     entry();
 }
