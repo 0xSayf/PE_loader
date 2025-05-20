@@ -30,7 +30,9 @@ void    ft_load_32(char *ptr)
     memcpy(image_base, ptr , size_of_headers);
     
     /* load all sections*/
-    section_RVA = elfanew + 0xF8;
+
+    WORD size_of_optional_header = *(WORD*)(ptr + elfanew + 0x14);
+    section_RVA = elfanew + 0x18 + size_of_optional_header;
     int i = 0;
     while  ( i < num_of_sections) 
     {
@@ -47,7 +49,7 @@ void    ft_load_32(char *ptr)
     
     IMAGE_IMPORT_DESCRIPTOR* import_dir = (IMAGE_IMPORT_DESCRIPTOR*) (image_base +  VA_import);
      i = 0;
-    while (import_dir[i].OriginalFirstThunk != 0)
+    while (import_dir[i].OriginalFirstThunk != 0 || import_dir[i].FirstThunk != 0)
     {
         BYTE *name_dll = image_base + import_dir[i].Name;
         HMODULE dll_load = LoadLibraryA(name_dll);
@@ -74,14 +76,39 @@ void    ft_load_32(char *ptr)
         } 
         i++;
     }
+    /*Loading the Basereloc (.reloc)*/
+
+    DWORD delta = (DWORD)image_base - (*(DWORD *)(ptr + 0x34));
+    DWORD   reloc_va = *(DWORD *)(ptr + elfanew + 0xA0);
+    if(reloc_va && delta)
+    {
+        IMAGE_BASE_RELOCATION* reloc = (IMAGE_BASE_RELOCATION*)(image_base + *(DWORD *)(ptr + elfanew + 0xA0));
+        while (reloc->VirtualAddress != 0)
+        {
+            unsigned int num_of_entry = (reloc->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / 2;
+            WORD* offset = (WORD*) (reloc + 1);
+            int i = 0;
+            while (i < num_of_entry)
+            {
+                int type = offset[i] >> 12;
+                int off_rv = offset[i] & 0x0fff;
+                DWORD *ch_address =  (DWORD*) (image_base + reloc->VirtualAddress + off_rv);
+               if (type == IMAGE_REL_BASED_HIGHLOW) 
+                    *ch_address += delta;
+                i++;
+            }
+            reloc = (IMAGE_BASE_RELOCATION*)((BYTE*)reloc + reloc->SizeOfBlock);
+        }
+        
+    }
 
     /* Setting permissions for headers and for each section*/
     
-    DWORD *oldprotect = NULL;
+    DWORD oldprotect ;
     DWORD  protect = 0;
-    VirtualProtect(image_base, size_of_headers, 0x02, oldprotect);
+    VirtualProtect(image_base, size_of_headers, 0x02, &oldprotect);
     i = 0;
-    section_RVA = elfanew + 0xF8;
+        section_RVA = elfanew + 0x18 + size_of_optional_header;
     while (i < num_of_sections)
     {
         DWORD   Characteristics = *(DWORD*)(ptr + section_RVA + 0x24);
@@ -90,24 +117,24 @@ void    ft_load_32(char *ptr)
         bool    EXEc = Characteristics & IMAGE_SCN_MEM_EXECUTE;
         bool    readix = Characteristics & IMAGE_SCN_MEM_READ;
         bool    writex = Characteristics & IMAGE_SCN_MEM_WRITE;
-        if(EXEc)
-        {
-            if(writex)
-                protect = 0x40;
+        if (EXEc) {
+            if (writex)
+                protect = PAGE_EXECUTE_READWRITE;
+            else if (readix)
+                protect = PAGE_EXECUTE_READ;
             else
-                protect = 0x20;
+                protect = PAGE_EXECUTE;
+        } else {
+            if (writex)
+                protect = PAGE_READWRITE;
+            else if (readix)
+                protect = PAGE_READONLY;
         }
-        else
-        {
-            if(writex)
-                protect = 0x04;
-            else 
-                protect = 0x02;
-        }
-        VirtualProtect(section_addr,raw_size , protect, oldprotect);
+        VirtualProtect(section_addr,raw_size , protect, &oldprotect);
         section_RVA += 40;
         i++;
     }
+    printf("fdfds\n");
     void (*entry)() = (void (*)())(image_base + entrypoint);
     entry();
 }
