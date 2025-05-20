@@ -77,8 +77,9 @@ void    ft_load_32(char *ptr)
         i++;
     }
     /*Loading the Basereloc (.reloc)*/
-    DWORD hh = *(DWORD*)(ptr + elfanew + 0x34);
-    DWORD delta = (DWORD)image_base - hh;
+
+    DWORD image_base_on_the_nt_header = *(DWORD*)(ptr + elfanew + 0x34);
+    DWORD delta = (DWORD)image_base - image_base_on_the_nt_header;
     DWORD   reloc_va = *(DWORD *)(ptr + elfanew + 0xA0);
     if(reloc_va && delta)
     {
@@ -135,6 +136,7 @@ void    ft_load_32(char *ptr)
         section_RVA += 40;
         i++;
     }
+
     void (*entry)() = (void (*)())(image_base + entrypoint);
     entry();
 }
